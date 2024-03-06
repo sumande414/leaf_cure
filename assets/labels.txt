@@ -1,0 +1,4 @@
+0 healthy
+1 cedar_apple_rust
+2 black_rot
+3 apple_scab
