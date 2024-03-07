@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:leaf_cure/constants/pesticides.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:tflite/tflite.dart';
@@ -14,6 +15,12 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   XFile? _image;
   List<dynamic>? _results = List.empty(growable: true);
+  Map<String, String> myMap = {
+    "0": "No pesticide required",
+    "1": CEDDAR_APPLE_RUST,
+    "2": BLACK_ROT,
+    "3": APPLE_SCAB
+  };
 
   Future loadModel() async {
     String? res;
@@ -29,10 +36,11 @@ class _HomeState extends State<Home> {
       path: image.path,
       numResults: 6,
       threshold: 0.05,
-      imageMean: 127.5,
-      imageStd: 127.5,
+      imageMean: 300,
+      imageStd: 300,
     );
     setState(() {
+      print(results);
       results![0]['photo'] = File(image.path);
       (_results != null) ? _results!.add(results[0]) : _results = results;
     });
@@ -66,7 +74,7 @@ class _HomeState extends State<Home> {
                   }
                 },
                 child: const Icon(Icons.insert_photo_outlined)),
-            SizedBox(
+            const SizedBox(
               width: 10,
             ),
             FloatingActionButton(
@@ -84,13 +92,27 @@ class _HomeState extends State<Home> {
         body: (_results != null && _results!.isNotEmpty)
             ? ListView.builder(
                 itemCount: _results!.length,
-                itemBuilder: (context, index) => ListTile(
-                      leading: Text((index + 1).toString()),
-                      title: Text(
-                        _results![index]['label'],
+                itemBuilder: (context, index) => GestureDetector(
+                      onTap: () => showModalBottomSheet(
+                          context: context,
+                          backgroundColor: Colors.white,
+                          builder: ((context) => SingleChildScrollView(
+                                  child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  child: Text(
+                                      "Pesticides:\n${myMap[_results![index]['label'][0]]}"),
+                                ),
+                              )))),
+                      child: ListTile(
+                        leading: Text((index + 1).toString()),
+                        title: Text(
+                          _results![index]['label'],
+                        ),
+                        trailing: Image.file(_results![index]['photo']),
+                        titleTextStyle: TextStyle(color: Colors.white),
                       ),
-                      trailing: Image.file(_results![index]['photo']),
-                      titleTextStyle: TextStyle(color: Colors.white),
                     ))
             : null);
   }
